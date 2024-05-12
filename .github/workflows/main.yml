@@ -1,27 +1,26 @@
-name: Build and Deploy
+name: Build and Deploy Website
 
 on:
   push:
     branches:
-      - main  # 코드를 푸시할 때마다 실행합니다.
+      - main  # 웹사이트의 소스 코드가 변경될 때마다 실행
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # Ubuntu 환경에서 실행합니다.
-
+    runs-on: ubuntu-latest
+    
     steps:
-      - name: Checkout Repository  # 리포지토리 체크아웃
-        uses: actions/checkout@v2
-      
-      - name: Install Dependencies  # 종속성 설치
-        run: npm install  # npm을 사용하여 종속성을 설치합니다.
-      
-      - name: Build Project  # 프로젝트 빌드
-        run: npm run build  # npm을 사용하여 프로젝트를 빌드합니다.
-
-      - name: Deploy to GitHub Pages  # GitHub Pages로 배포
-        uses: JamesIves/github-pages-deploy-action@3.7.1  # GitHub Pages 배포 액션을 사용합니다.
-        with:
-          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}  # GitHub Personal Access Token을 사용하여 배포합니다.
-          BRANCH: gh-pages  # 배포할 브랜치를 지정합니다.
-          FOLDER: ./  # 배포할 폴더를 지정합니다. 여기서는 빌드된 파일이 있는 폴더를 지정합니다.
+    - name: Checkout repository
+      uses: actions/checkout@v2  # 코드 저장소를 체크아웃하여 작업 환경으로 가져옴
+    
+    - name: Convert Markdown to HTML
+      uses: jasonetco/marked-action@v2
+      with:
+        args: --input ./docs --output ./public  # Markdown 파일을 HTML로 변환하여 public 디렉터리에 저장
+    
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}  # GitHub 토큰 사용하여 인증
+        publish_dir: ./public  # 빌드된 웹사이트 파일이 있는 디렉터리
+        force_orphan: true  # 기존 브랜치를 무시하고 새로운 브랜치에 커밋
